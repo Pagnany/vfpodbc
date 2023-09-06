@@ -24,9 +24,16 @@ fn execute_statement<'env>(conn: &Connection<'env, AutocommitOn>) -> Result<()> 
     let stmt = Statement::with_parent(conn)?;
 
     let sql_text = "select * from Hallodatei".to_string();
+
+    let (encode, _, _) = WINDOWS_1252.encode(&sql_text);
+    let mut s = String::new();
+    unsafe {
+        s = String::from_utf8_unchecked(encode.to_vec());
+    }
+
     let mut count = 1;
 
-    match stmt.exec_direct(&sql_text)? {
+    match stmt.exec_direct(&s)? {
         Data(mut stmt) => {
             let cols = stmt.num_result_cols()?;
             while let Some(mut cursor) = stmt.fetch()? {
@@ -45,6 +52,26 @@ fn execute_statement<'env>(conn: &Connection<'env, AutocommitOn>) -> Result<()> 
         NoData(_) => println!("Query executed, no data returned"),
     }
     println!("Count: {}", count);
+
+    Ok(())
+}
+
+fn insert_statement<'env>(conn: &Connection<'env, AutocommitOn>) -> Result<()> {
+    let stmt = Statement::with_parent(conn)?;
+    let sql_text =
+        "INSERT INTO Hallodatei (name, number, logical, id, memo, date, datetime) VALUES ('insert Ä ü ö ß', 1.35, .F., 5, 'Hier können wir auch mal etwas längeres schreiben', DATE(), DATETIME())"
+            .to_string();
+
+    let (encode, _, _) = WINDOWS_1252.encode(&sql_text);
+    let mut s = String::new();
+    unsafe {
+        s = String::from_utf8_unchecked(encode.to_vec());
+    }
+
+    match stmt.exec_direct(&s)? {
+        Data(_) => println!("Query executed, data returned"),
+        NoData(_) => println!("Query executed, no data returned"),
+    }
 
     Ok(())
 }
