@@ -26,10 +26,8 @@ fn execute_statement<'env>(conn: &Connection<'env, AutocommitOn>) -> Result<()> 
     let sql_text = "select * from Hallodatei".to_string();
 
     let (encode, _, _) = WINDOWS_1252.encode(&sql_text);
-    let mut s = String::new();
-    unsafe {
-        s = String::from_utf8_unchecked(encode.to_vec());
-    }
+
+    let s = unsafe { String::from_utf8_unchecked(encode.to_vec()) };
 
     let mut count = 1;
 
@@ -63,10 +61,8 @@ fn insert_statement<'env>(conn: &Connection<'env, AutocommitOn>) -> Result<()> {
             .to_string();
 
     let (encode, _, _) = WINDOWS_1252.encode(&sql_text);
-    let mut s = String::new();
-    unsafe {
-        s = String::from_utf8_unchecked(encode.to_vec());
-    }
+
+    let s = unsafe { String::from_utf8_unchecked(encode.to_vec()) };
 
     match stmt.exec_direct(&s)? {
         Data(_) => println!("Query executed, data returned"),
